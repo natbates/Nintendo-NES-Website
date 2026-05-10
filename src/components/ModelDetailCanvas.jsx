@@ -182,8 +182,9 @@ function ModelDetailCanvas({ productKey }) {
       if (!textureDef) return;
       setSelectedTextureKey(textureDef.key || null);
       await applyTextureDefinition(modelRef.current, textureDef, textureCacheRef.current, resolveResourceValue);
+      playSound(textureDef.soundFile, { volume: 0.2 });
     },
-    [resolveResourceValue]
+    [playSound, resolveResourceValue]
   );
 
   const applyState = useCallback(
@@ -203,11 +204,17 @@ function ModelDetailCanvas({ productKey }) {
         if (matchedTexture) {
           setSelectedTextureKey(matchedTexture.key || null);
           await applyTextureDefinition(modelRef.current, matchedTexture, textureCacheRef.current, resolveResourceValue);
+          if (playEffects) {
+            playSound(matchedTexture.soundFile, { volume: 0.2 });
+          }
         }
       }
 
       if (stateDef.textureFile || stateDef.texture || stateDef.emissiveTextureFile || stateDef.emissiveTexture) {
         await applyTextureDefinition(modelRef.current, stateDef, textureCacheRef.current, resolveResourceValue);
+        if (playEffects) {
+          playSound(stateDef.soundFile, { volume: 0.2 });
+        }
       }
 
       if (typeof stateDef.emissiveIntensity === 'number') {

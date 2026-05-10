@@ -170,7 +170,8 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
     if (!textureDef) return;
     setSelectedTextureKey(textureDef.key || null);
     await applyTextureDefinition(textureDef);
-  }, [applyTextureDefinition]);
+    playSound(textureDef.soundFile, { volume: 0.2 });
+  }, [applyTextureDefinition, playSound]);
 
   const applyState = useCallback(async (stateDef, options = {}) => {
     if (!stateDef) return;
@@ -188,11 +189,17 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
       if (matchedTexture) {
         setSelectedTextureKey(matchedTexture.key || null);
         await applyTextureDefinition(matchedTexture);
+        if (playEffects) {
+          playSound(matchedTexture.soundFile, { volume: 0.2 });
+        }
       }
     }
 
     if (stateDef.textureFile || stateDef.texture || stateDef.emissiveTextureFile || stateDef.emissiveTexture) {
       await applyTextureDefinition(stateDef);
+      if (playEffects) {
+        playSound(stateDef.soundFile, { volume: 0.2 });
+      }
     }
 
     if (typeof stateDef.emissiveIntensity === 'number') {

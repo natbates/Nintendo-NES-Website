@@ -67,7 +67,6 @@
         }
       ],
       "states": [],
-      "sounds": [],
       "about": {
         "title": "Controller reference",
         "summary": "This model stays intentionally simple so it can act as a clean comparison object without animation requirements.",
@@ -96,21 +95,24 @@
           "label": "Super Mario Bros.",
           "textureFile": "textures/mario/mario.png",
           "previewImage": "textures/mario/mario-preview.png",
-          "materialName": "GameTexture"
+          "materialName": "GameTexture",
+          "soundFile": "sounds/mario.mp3"
         },
         {
           "key": "duckhunt",
           "label": "Duck Hunt",
           "textureFile": "textures/duckhunt/duckhunt.png",
           "previewImage": "textures/duckhunt/duckhunt-preview.png",
-          "materialName": "GameTexture"
+          "materialName": "GameTexture",
+          "soundFile": "sounds/duckhunt.mp3"
         },
         {
           "key": "legend-of-zelda",
           "label": "Legend of Zelda",
           "textureFile": "textures/zelda/zelda.png",
           "previewImage": "textures/zelda/zelda-preview.png",
-          "materialName": "GameTexture"
+          "materialName": "GameTexture",
+          "soundFile": "sounds/zelda.mp3"
         }
       ],
       "about": {
