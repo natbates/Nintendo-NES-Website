@@ -1,12 +1,59 @@
 
+import '../styles/References.css';
+
+const references = [
+  {
+    label: 'Three.js Documentation',
+    url: 'https://threejs.org/docs/',
+    description: 'API reference for the 3D engine used in the project.',
+  },
+  {
+    label: 'YouTube Tutorial',
+    url: 'https://www.youtube.com/watch?v=w2XvGYxQiOk&t=240s',
+    description: 'Helpful video reference for the carousel-style 3D setup.',
+  },
+  {
+    label: 'Font used',
+    url: 'https://fontstruct.com/fontstructions/show/406653',
+    description: 'The NES-style font used across the site.',
+  },
+  {
+    label: 'Icon used',
+    url: 'https://www.svgrepo.com/svg/500869/game',
+    description: 'Game-themed icon used in the interface.',
+  },
+  {
+    label: 'React with Three.js',
+    url: 'https://dev.to/diballesteros/how-to-use-threejs-in-a-react-app-to-render-a-3d-model-gm5',
+    description: 'Reference for using Three.js inside a React app.',
+  },
+  {
+    label: 'Carousel repo inspiration',
+    url: 'https://github.com/ashikjs/3d-model-gallery',
+    description: 'Similar 3D gallery project used as structural inspiration.',
+  },
+];
 
 const References = () => {
   return (
-    <div className='page'>
+    <div className="page">
       <h1>References</h1>
-      <ul>
-        <li>Three.js Documentation: https://threejs.org/docs/</li>
-        <li>YouTube Tutorial: https://www.youtube.com/watch?v=w2XvGYxQiOk&t=240s</li>
+
+      <ul className="references-list">
+        {references.map((item) => (
+          <li key={item.url} className="reference-item">
+            <span className="reference-label">{item.label}:</span>{' '}
+            <a
+              href={item.url}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="link"
+            >
+              {item.url}
+            </a>
+            <p className="reference-description">{item.description}</p>
+          </li>
+        ))}
       </ul>
     </div>
   );

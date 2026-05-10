@@ -261,8 +261,6 @@ function ModelDetailCanvas({ productKey }) {
   useEffect(() => {
     if (!canvasRef.current || !config) return;
 
-    console.log('[ModelDetailCanvas] init', { productKey, config });
-
     const canvas = canvasRef.current;
     const width = canvas.clientWidth || 800;
     const height = canvas.clientHeight || 600;
@@ -314,7 +312,6 @@ function ModelDetailCanvas({ productKey }) {
     let isMounted = true;
 
     const path = makeModelPath(config.file);
-    console.log('[ModelDetailCanvas] loading GLTF path:', path);
 
     loader.load(
       path,

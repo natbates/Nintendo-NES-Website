@@ -1,0 +1,11 @@
+
+
+.references-list{
+    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    list-style: decimal;
+    opacity: 0.8;
+    margin-top: 25px;
+}

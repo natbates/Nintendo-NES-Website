@@ -9,7 +9,7 @@ function About() {
 
         <h4>Motivation</h4>
         <p className="text-block">I have a flatmate who is obssesed with old Nintendo games and consoles and he recommended that I could try model some of his collection.
-          I hadnt used blender before this project but I am a (somewhat decent) web developer so i spent some more time on learning blender.
+          I hadnt used blender before this project but I am a (somewhat decent) <a href="https://nathanielbates.uk" target="_blank" rel="noopener noreferrer" className="link">web developer</a> so i spent some more time on learning blender.
           I am hoping that nintendo doesnt sue me for this.
         </p>
 

@@ -67,12 +67,10 @@ export function ResourceProvider({ children }) {
 
     const loadResources = async () => {
       try {
-        console.log('[ResourceContext] loading resources...');
         setLoading(true);
 
         const textureData = await fetchJsonAsset(`${assetRoot}/textures.json`);
         if (textureData) {
-          console.log('[ResourceContext] textures loaded:', textureData);
           setTextureDefinitions(textureData);
         } else {
           console.warn('[ResourceContext] textures.json not found or invalid; continuing without textures');
@@ -84,25 +82,19 @@ export function ResourceProvider({ children }) {
           throw new Error('model-config.json not found or invalid');
         }
 
-        console.log('[ResourceContext] raw model config:', configData);
-
         if (!configData.models || !Array.isArray(configData.models)) {
           throw new Error('model-config.json missing "models" array');
         }
 
         const mapped = Object.fromEntries(
           configData.models.map((model) => {
-            console.log('[ResourceContext] mapping model:', model.key);
             return [model.key, model];
           })
         );
 
-        console.log('[ResourceContext] mapped modelConfigs:', mapped);
-
         setModelConfigs(mapped);
-
         setError(null);
-        console.log('[ResourceContext] load complete');
+        
       } catch (err) {
         console.error('[ResourceContext] FAILED:', err);
         setError(err.message);
