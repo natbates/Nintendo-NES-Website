@@ -13,6 +13,11 @@ const references = [
     description: 'Helpful video reference for the carousel-style 3D setup.',
   },
   {
+    label: "Original Creator of the 3D models",
+    url: "https://www.nintendo.com/en-gb/",
+    description: "The original creator of the 3D models used in this project (I didnt invent the NES)."
+  },
+  {
     label: 'Font used',
     url: 'https://fontstruct.com/fontstructions/show/406653',
     description: 'The NES-style font used across the site.',
