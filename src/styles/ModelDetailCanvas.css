@@ -1,0 +1,193 @@
+.model-detail-canvas-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.model-detail-canvas-shell {
+  position: relative;
+  width: 100%;
+}
+
+.model-detail-canvas {
+  width: 100%;
+  height: 500px;
+  display: block;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.model-detail-canvas-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+  padding: 12px;
+  gap: 12px;
+}
+
+.model-zoom-control-group {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.model-inline-spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.6);
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.model-zoom-control {
+  width: 38px;
+  height: 38px;
+  padding: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.model-zoom-control:hover {
+  border-color: rgba(255, 255, 255, 0.65);
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+}
+
+.overlay-lighting-control
+{
+    bottom: 16px;
+}
+
+.overlay-lighting-control,
+.model-canvas-button-stack {
+  pointer-events: auto;
+}
+
+.model-canvas-button-stack {
+  display: flex;
+  position: absolute;
+  flex-direction: row;
+  gap: 10px;
+  bottom: 10px;
+  right: 10px;
+  align-self: flex-start;
+  max-width: min(100%, 520px);
+}
+
+.canvas-texture-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.texture-option-chip {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.texture-option-chip:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.texture-option-chip.active {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.texture-preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.texture-preview-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 0.7rem;
+  text-align: center;
+  padding: 4px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.canvas-state-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.canvas-animation-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.canvas-stack-button {
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.canvas-stack-button:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(0, 0, 0, 0.7);
+  color: rgba(255, 255, 255, 1);
+}
+
+.canvas-stack-button.active,
+.wireframe-btn.active {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--accent);
+}
+
+.cycle-btn {
+  font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .model-detail-canvas {
+    height: 360px;
+  }
+
+  .model-detail-canvas-overlay {
+    padding: 10px;
+  }
+
+  .model-canvas-button-stack {
+    max-width: 100%;
+  }
+}

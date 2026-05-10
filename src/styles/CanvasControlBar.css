@@ -1,0 +1,83 @@
+.canvas-control-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.canvas-control-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #161616;
+  border: 1px solid rgba(0, 0, 0, 0.42);
+  padding: 6px 10px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.canvas-control-toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.canvas-control-toggle input:focus-visible + .canvas-control-icon {
+  outline: 2px solid #1d5fe0;
+  outline-offset: 2px;
+}
+
+.canvas-control-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #1f1f1f;
+  background: #f7f7f7;
+  color: #1f1f1f;
+  flex-shrink: 0;
+}
+
+.canvas-control-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.canvas-control-lighting {
+  gap: 10px;
+}
+
+.canvas-control-light-icon {
+  flex-shrink: 0;
+}
+
+.canvas-control-slider {
+  width: 120px;
+  accent-color: #1d5fe0;
+}
+
+.canvas-control-value {
+  color: rgba(22, 22, 22, 0.92);
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 32px;
+  text-align: right;
+}
+
+@media (max-width: 900px) {
+  .canvas-control-bar {
+    gap: 6px;
+  }
+
+  .canvas-control-slider {
+    width: 84px;
+  }
+}
