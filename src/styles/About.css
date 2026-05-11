@@ -15,7 +15,7 @@
 {
     font-size: 1.25rem;
     margin-bottom: 0.2rem;
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
 .about-page p {
@@ -28,23 +28,23 @@
 .model-images
 {
   display: flex;
+  flex-wrap: wrap;
   gap: 1.5rem;
   width: 100%;
 }
 
-.model-images img
+.model-images .model-image
 {
-  width: 100%;
-  max-width: 300px;
+  height: 350px;
+  width: auto;
+  object-fit: contain;
   border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(0, 0, 0, 0.32);
-  margin-bottom: 0.5rem;
 }
+
 
 .sound-video-grid
 {
     display: flex;
-    
     gap: 2rem;
     margin-top: 1rem;
     margin-bottom: 1.5rem;

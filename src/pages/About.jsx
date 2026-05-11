@@ -20,8 +20,10 @@ function About() {
         </p>
         
         <div className="model-images">
-          <img src="/assets/images/blender.png" alt="Blender Screenshot" className="about-image" />
-          <img src="/assets/images/collection.png" alt="NES Collection" className="about-image" />
+          <img src="/assets/images/blender.png" alt="Blender Screenshot" className="model-image" />
+          <img src="/assets/images/collection.png" alt="NES Collection" className="model-image" />
+          <img src="/assets/images/Zappermodel.png" alt="Zapper Model" className="model-image" />
+          <img src="/assets/images/NESmodel.png" alt="NES Model" className="model-image" />
         </div>
 
         <p className="text-block">
@@ -85,6 +87,9 @@ function About() {
           <li>Include more sounds for animations and vary between them randomly (if site is optimised)</li>
           <li>Improve the lighting and materials in the scene to make it look nicer (maybe post processing?)</li>
         </ul>
+
+        <h4>Testing</h4>
+        <p className="text-block">I tested the website by sending it to Daniel Creed and he esnured the website was able to load without any issues </p>
 
     </div>
   );
