@@ -38,10 +38,10 @@ const references = [
     description: "Reference for using Three.js inside a React app.",
   },
   {
-    label: "Carousel repo inspiration",
-    url: "https://github.com/ashikjs/3d-model-gallery",
-    description: "Similar 3D gallery project used as structural inspiration.",
-  },
+    label: "Building a React Carousel Component",
+    url: "https://www.freecodecamp.org/news/how-to-build-an-image-carousel-component/",
+    description: "Guide on implementing carousel patterns in React including auto-scroll and horizontal centering logic.",
+  }
 ];
 
 const References = () => {

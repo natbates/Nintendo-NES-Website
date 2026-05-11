@@ -12,3 +12,5 @@
 `npm start`
 
 4. Open the link shown in the terminal, usually [http://localhost:3000]
+
+5. (Optional: go to [https://the1985nes.netlify.app/])

@@ -8,8 +8,8 @@ function About() {
         <h1>About this Project</h1>
 
         <h4>Motivation</h4>
-        <p className="text-block">I have a flatmate who is obssesed with old Nintendo games and consoles and he recommended that I could try model some of his collection.
-          I hadnt used blender before this project but I am a (somewhat decent) <a href="https://nathanielbates.uk" target="_blank" rel="noopener noreferrer" className="link">web developer</a> so i spent some more time on learning blender.
+        <p className="text-block">I have a flatmate who is obsessed with old Nintendo games and consoles and he recommended that I could try modelling some of his collection.
+          I hadn't used Blender before this project but I am a (somewhat decent) <a href="https://nathanielbates.uk" target="_blank" rel="noopener noreferrer" className="link">web developer</a> so I spent some more time learning Blender.
           I am also hoping that nintendo doesnt sue me for this.
         </p>
 
@@ -27,20 +27,20 @@ function About() {
         </div>
 
         <p className="text-block">
-          Beveling was using for smoohing edges and adding curves and details. UV unwrapping was used for accurate texture mapping for the cartiridge images.
-          I used boolean operations to combine and modify shapes and array modifiers for the repeated lines on cartirdge, NES and zapper (the grip). Materials are then applied to the models to give them their colours and textures.
+          Beveling was used for smoothing edges and adding curves and details. UV unwrapping was used for accurate texture mapping for the cartridge images.
+          I used boolean operations to combine and modify shapes and array modifiers for the repeated lines on the cartridge, NES, and Zapper (the grip). Materials are then applied to the models to give them their colours and textures.
         </p>
 
         <h4>Animations and Interactions</h4>
-        <p className="text-block">The animations were super simple to do in blender. First, I would select all the parts of the model that would be moving and seperate them as a seperate object.
-          I would then in the animation window move the model to a new posiion for the animation and add the keyframes (its position, rotiation, scale etc.) to the action editor.
+        <p className="text-block">The animations were straightforward to create in Blender. First, I would select all the parts of the model that would be moving and separate them as a separate object.
+          I would then use the animation window to move the model to a new position for the animation and add the keyframes (position, rotation, scale, etc.) to the action editor.
           Then using the animation name, they can be called using ThreeJs in the website. I can also use Three js to change materail images to allow for the cartiridge to show different games and the NES light to turn on and off. 
         </p>
 
         <h4>Sound Design</h4>
         <p className="text-block">
           For the sounds (for the animations) I actually recorded them myself using my phone and my flatmates collection. I recorded, cropped and loaded the sounds into the scene.
-          The cartridge sounds for changing the game were fetched from online website which has been referenced in the reference page. I was going to incude more sounds for some variation but the website was already under enough load so I left as it was.
+          The cartridge sounds for changing the game were fetched from an online resource which has been referenced in the References page. I was going to include more sounds for some variation but the website was already under enough load so I left it as is.
           Sounds are preloaded and cached in the browser and are triggered by the animation handlers — this keeps latency low and ensures sounds are played in sync with their animations.
         </p>
 
