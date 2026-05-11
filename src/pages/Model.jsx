@@ -86,7 +86,7 @@ function Model() {
                     ) : mediaType === 'video' ? (
                       <video controls src={mediaSource} poster={mediaPoster || undefined} />
                     ) : (
-                      <img src={mediaSource} alt={mediaTitle} />
+                      <img src={mediaSource} alt={mediaTitle} className="model-media-image" />
                     )
                   ) : (
                     <p className="model-summary">Media source is missing from config.</p>
