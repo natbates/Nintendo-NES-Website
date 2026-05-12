@@ -1,25 +1,29 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useResources } from '../../context/ResourceContext';
-import { useCarousel } from '../../context/CarouselContext';
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import '../../styles/CarouselCanvas.css';
-import { FaEye } from 'react-icons/fa6';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useNavigate } from "react-router-dom";
+import { useResources } from "../../context/ResourceContext";
+import { useCarousel } from "../../context/CarouselContext";
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import "../../styles/CarouselCanvas.css";
+import { FaEye } from "react-icons/fa6";
 import {
   getModelMaterials as utilGetModelMaterials,
   cacheMaterialDefaults as utilCacheMaterialDefaults,
   playAnimationByName as utilPlayAnimationByName,
   applyTextureDefinition as utilApplyTextureDefinition,
   restoreMaterialDefaults as utilRestoreMaterialDefaults,
-} from '../../utils/canvasUtils.ts';
-
-const BASE_LIGHTS = {
-  hemisphere: 1.15,
-  ambient: 1.2,
-  key: 2.25,
-  fill: 1.2,
-};
+} from "../../utils/canvasUtils.ts";
+import {
+  createSceneLights,
+  applyLightStrength,
+  frameCameraToModel,
+} from "../../utils/sceneSetupUtils.ts";
 
 const sharedGLTFLoader = new GLTFLoader();
 const sharedGLTFPromiseCache = new Map();
@@ -31,7 +35,9 @@ const cloneSceneWithUniqueMaterials = (scene) => {
     if (!obj.isMesh || !obj.material) return;
 
     if (Array.isArray(obj.material)) {
-      obj.material = obj.material.map((mat) => (mat?.clone ? mat.clone() : mat));
+      obj.material = obj.material.map((mat) =>
+        mat?.clone ? mat.clone() : mat,
+      );
     } else if (obj.material.clone) {
       obj.material = obj.material.clone();
     }
@@ -42,20 +48,26 @@ const cloneSceneWithUniqueMaterials = (scene) => {
 
 const getSharedGLTF = (path) => {
   if (!path) {
-    return Promise.reject(new Error('Missing GLTF path'));
+    return Promise.reject(new Error("Missing GLTF path"));
   }
 
   if (!sharedGLTFPromiseCache.has(path)) {
     const loadPromise = new Promise((resolve, reject) => {
       sharedGLTFLoader.load(path, resolve, undefined, reject);
     });
-    sharedGLTFPromiseCache.set(path, loadPromise);
+    sharedGLTFPromiseCache.set(path, loadPromise); // Reuse one GLTF load across duplicate carousel slides.
   }
 
   return sharedGLTFPromiseCache.get(path);
 };
 
-function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChange, onModelReady, shouldReportReady = true }) {
+function CarouselCanvas({
+  productKey,
+  lightStrength = 1,
+  onModelScreenPointChange,
+  onModelReady,
+  shouldReportReady = true,
+}) {
   const navigate = useNavigate();
 
   const canvasRef = useRef(null);
@@ -97,17 +109,17 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
 
   const animationActions = useMemo(
     () => (Array.isArray(config?.animations) ? config.animations : []),
-    [config]
+    [config],
   );
 
   const textureOptions = useMemo(
     () => (Array.isArray(config?.textures) ? config.textures : []),
-    [config]
+    [config],
   );
 
   const stateOptions = useMemo(
     () => (Array.isArray(config?.states) ? config.states : []),
-    [config]
+    [config],
   );
 
   useEffect(() => {
@@ -127,97 +139,151 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
     }
   }, [playSoundsEnabled, stopAudio]);
 
-  const playSound = useCallback((soundFile) => {
-    if (!soundFile || !playSoundsEnabled) return;
+  const playSound = useCallback(
+    (soundFile) => {
+      if (!soundFile || !playSoundsEnabled) return;
 
-    const source = resolveResourceValue(soundFile);
-    if (!source) return;
+      const source = resolveResourceValue(soundFile);
+      if (!source) return;
 
-    stopAudio();
+      stopAudio();
 
-    const audio = new Audio(source);
-    audioRef.current = audio;
-    audio.play().catch((error) => {
-      console.warn(`[CarouselCanvas] Failed to play sound for ${productKey}:`, error);
-    });
-  }, [playSoundsEnabled, productKey, resolveResourceValue, stopAudio]);
+      const audio = new Audio(source);
+      audioRef.current = audio;
+      audio.play().catch((error) => {
+        console.warn(
+          `[CarouselCanvas] Failed to play sound for ${productKey}:`,
+          error,
+        );
+      });
+    },
+    [playSoundsEnabled, productKey, resolveResourceValue, stopAudio],
+  );
 
-  const getModelMaterials = useCallback(() => utilGetModelMaterials(modelRef.current), []);
+  const getModelMaterials = useCallback(
+    () => utilGetModelMaterials(modelRef.current),
+    [],
+  );
 
   const cacheMaterialDefaults = useCallback(() => {
     materialDefaultsRef.current = utilCacheMaterialDefaults(modelRef.current);
   }, []);
 
   const playAnimationByName = useCallback((clipName, options = {}) => {
-    utilPlayAnimationByName(mixerRef.current, clipsRef.current, clipName, options);
+    utilPlayAnimationByName(
+      mixerRef.current,
+      clipsRef.current,
+      clipName,
+      options,
+    );
   }, []);
 
-  const applyTextureDefinition = useCallback(async (textureDef) => {
-    await utilApplyTextureDefinition(modelRef.current, textureDef, textureCacheRef.current, resolveResourceValue);
-  }, [resolveResourceValue]);
+  const applyTextureDefinition = useCallback(
+    async (textureDef) => {
+      await utilApplyTextureDefinition(
+        modelRef.current,
+        textureDef,
+        textureCacheRef.current,
+        resolveResourceValue,
+      );
+    },
+    [resolveResourceValue],
+  );
 
   const restoreMaterialDefaults = useCallback((materialNameFilter) => {
-    utilRestoreMaterialDefaults(modelRef.current, materialDefaultsRef.current, materialNameFilter);
+    utilRestoreMaterialDefaults(
+      modelRef.current,
+      materialDefaultsRef.current,
+      materialNameFilter,
+    );
   }, []);
 
-  const handleAnimation = useCallback((animationDef) => {
-    if (!animationDef) return;
-    playAnimationByName(animationDef.animation);
-    playSound(animationDef.soundFile);
-  }, [playAnimationByName, playSound]);
+  const handleAnimation = useCallback(
+    (animationDef) => {
+      if (!animationDef) return;
+      playAnimationByName(animationDef.animation);
+      playSound(animationDef.soundFile);
+    },
+    [playAnimationByName, playSound],
+  );
 
-  const handleTexture = useCallback(async (textureDef) => {
-    if (!textureDef) return;
-    setSelectedTextureKey(textureDef.key || null);
-    await applyTextureDefinition(textureDef);
-    playSound(textureDef.soundFile, { volume: 0.2 });
-  }, [applyTextureDefinition, playSound]);
+  const handleTexture = useCallback(
+    async (textureDef) => {
+      if (!textureDef) return;
+      setSelectedTextureKey(textureDef.key || null);
+      await applyTextureDefinition(textureDef);
+      playSound(textureDef.soundFile, { volume: 0.2 });
+    },
+    [applyTextureDefinition, playSound],
+  );
 
-  const applyState = useCallback(async (stateDef, options = {}) => {
-    if (!stateDef) return;
+  const applyState = useCallback(
+    async (stateDef, options = {}) => {
+      if (!stateDef) return;
 
-    const { playEffects = true } = options;
+      const { playEffects = true } = options;
 
-    setSelectedStateKey(stateDef.key || null);
+      setSelectedStateKey(stateDef.key || null);
 
-    if (stateDef.resetToDefault) {
-      restoreMaterialDefaults(stateDef.materialName);
-    }
+      if (stateDef.resetToDefault) {
+        restoreMaterialDefaults(stateDef.materialName);
+      }
 
-    if (stateDef.textureKey && textureOptions.length > 0) {
-      const matchedTexture = textureOptions.find((texture) => texture.key === stateDef.textureKey);
-      if (matchedTexture) {
-        setSelectedTextureKey(matchedTexture.key || null);
-        await applyTextureDefinition(matchedTexture);
-        if (playEffects) {
-          playSound(matchedTexture.soundFile, { volume: 0.2 });
+      if (stateDef.textureKey && textureOptions.length > 0) {
+        const matchedTexture = textureOptions.find(
+          (texture) => texture.key === stateDef.textureKey,
+        );
+        if (matchedTexture) {
+          setSelectedTextureKey(matchedTexture.key || null);
+          await applyTextureDefinition(matchedTexture);
+          if (playEffects) {
+            playSound(matchedTexture.soundFile, { volume: 0.2 });
+          }
         }
       }
-    }
 
-    if (stateDef.textureFile || stateDef.texture || stateDef.emissiveTextureFile || stateDef.emissiveTexture) {
-      await applyTextureDefinition(stateDef);
-      if (playEffects) {
-        playSound(stateDef.soundFile, { volume: 0.2 });
+      if (
+        stateDef.textureFile ||
+        stateDef.texture ||
+        stateDef.emissiveTextureFile ||
+        stateDef.emissiveTexture
+      ) {
+        await applyTextureDefinition(stateDef);
+        if (playEffects) {
+          playSound(stateDef.soundFile, { volume: 0.2 });
+        }
       }
-    }
 
-    if (typeof stateDef.emissiveIntensity === 'number') {
-      getModelMaterials().forEach((material) => {
-        const targetMaterial = stateDef.materialName
-          ? (material.name || '').toLowerCase().includes(stateDef.materialName.toLowerCase())
-          : true;
-        if (!targetMaterial || !(material && 'emissiveIntensity' in material)) return;
-        material.emissiveIntensity = stateDef.emissiveIntensity;
-        material.needsUpdate = true;
-      });
-    }
+      if (typeof stateDef.emissiveIntensity === "number") {
+        getModelMaterials().forEach((material) => {
+          const targetMaterial = stateDef.materialName
+            ? (material.name || "")
+                .toLowerCase()
+                .includes(stateDef.materialName.toLowerCase())
+            : true;
+          if (!targetMaterial || !(material && "emissiveIntensity" in material))
+            return;
+          material.emissiveIntensity = stateDef.emissiveIntensity;
+          material.needsUpdate = true;
+        });
+      }
 
-    if (playEffects) {
-      playAnimationByName(stateDef.animation, { reverse: Boolean(stateDef.reverseAnimation) });
-      playSound(stateDef.soundFile);
-    }
-  }, [applyTextureDefinition, getModelMaterials, playAnimationByName, playSound, restoreMaterialDefaults, textureOptions]);
+      if (playEffects) {
+        playAnimationByName(stateDef.animation, {
+          reverse: Boolean(stateDef.reverseAnimation),
+        });
+        playSound(stateDef.soundFile);
+      }
+    },
+    [
+      applyTextureDefinition,
+      getModelMaterials,
+      playAnimationByName,
+      playSound,
+      restoreMaterialDefaults,
+      textureOptions,
+    ],
+  );
 
   const toggleWireframe = () => {
     const nextWireframeState = !wireframeMode;
@@ -234,8 +300,7 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
     const currentKey = selectedStateKey;
     let idx = stateOptions.findIndex((s) => s.key === currentKey);
     if (idx === -1) {
-      // If no current selection, try to find the default, otherwise start at 0
-      idx = stateOptions.findIndex((s) => s.default);
+      idx = stateOptions.findIndex((s) => s.default); // Fall back to the configured default state first.
       if (idx === -1) idx = 0;
     }
 
@@ -267,8 +332,8 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
     renderer.setSize(width, height, false);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setClearColor(0x000000, 0);
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.0;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
 
     rendererRef.current = renderer;
 
@@ -280,26 +345,7 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
     camera.position.set(0, 3, 9);
     cameraRef.current = camera;
 
-    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0xffffff, BASE_LIGHTS.hemisphere * lightStrength);
-    scene.add(hemisphereLight);
-
-    const ambientLight = new THREE.AmbientLight(0xffffff, BASE_LIGHTS.ambient * lightStrength);
-    scene.add(ambientLight);
-
-    const keyLight = new THREE.DirectionalLight(0xffffff, BASE_LIGHTS.key * lightStrength);
-    keyLight.position.set(6, 8, 5);
-    scene.add(keyLight);
-
-    const fillLight = new THREE.DirectionalLight(0xffffff, BASE_LIGHTS.fill * lightStrength);
-    fillLight.position.set(-5, 3, -4);
-    scene.add(fillLight);
-
-    lightRefs.current = {
-      hemisphere: hemisphereLight,
-      ambient: ambientLight,
-      key: keyLight,
-      fill: fillLight,
-    };
+    lightRefs.current = createSceneLights(scene, lightStrength);
 
     let isMounted = true;
 
@@ -311,28 +357,16 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
 
         const model = cloneSceneWithUniqueMaterials(gltf.scene);
         modelRef.current = model;
-        mixerRef.current = gltf.animations?.length ? new THREE.AnimationMixer(model) : null;
+        mixerRef.current = gltf.animations?.length
+          ? new THREE.AnimationMixer(model)
+          : null;
         clipsRef.current = gltf.animations || [];
 
         model.rotation.z = Math.PI / 4;
 
-        // Frame the camera from the canonical mesh size so config scale changes
-        // are visible on screen instead of being normalized away.
-        model.scale.setScalar(1);
+        model.scale.setScalar(1); // Frame camera from canonical size before applying config scale.
 
-        const box = new THREE.Box3().setFromObject(model);
-        const size = box.getSize(new THREE.Vector3());
-        const center = box.getCenter(new THREE.Vector3());
-
-        model.position.sub(center);
-
-        const maxSize = Math.max(size.x, size.y, size.z);
-        const fov = (camera.fov * Math.PI) / 180;
-        const distance = maxSize / (2 * Math.tan(fov / 2));
-
-        camera.position.set(0, maxSize * 0.35, distance * 1.4);
-        camera.lookAt(0, 0, 0);
-        camera.updateProjectionMatrix();
+        frameCameraToModel(camera, model);
 
         model.scale.setScalar(config.scale ?? 1);
 
@@ -340,7 +374,9 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
 
         cacheMaterialDefaults();
 
-        const defaultTexture = textureOptions.find((texture) => texture.key === config.defaultTexture);
+        const defaultTexture = textureOptions.find(
+          (texture) => texture.key === config.defaultTexture,
+        );
         if (defaultTexture) {
           setSelectedTextureKey(defaultTexture.key || null);
           applyTextureDefinition(defaultTexture);
@@ -351,8 +387,8 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
           applyState(defaultState, { playEffects: false });
         }
 
-        // Notify parent after the model is in the scene and the next paint has happened.
         if (onModelReady && shouldReportReady) {
+          // Two RAFs ensure parent loading UI clears after this canvas has actually painted.
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               if (isMounted) onModelReady(productKey);
@@ -361,13 +397,12 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
         }
       },
       (err) => {
-        console.error('GLB load error:', err);
+        console.error("GLB load error:", err);
 
-        // Prevent loader deadlock if a model fails to load.
         if (onModelReady && shouldReportReady) {
-          onModelReady(productKey);
+          onModelReady(productKey); // Avoid blocking global ready state on one failed model.
         }
-      }
+      },
     );
 
     const onDown = (e) => {
@@ -396,9 +431,9 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
       modelRef.current.rotation.y += dx * 0.005;
     };
 
-    canvas.addEventListener('mousedown', onDown);
-    window.addEventListener('mouseup', onUp);
-    window.addEventListener('mousemove', onMove);
+    canvas.addEventListener("mousedown", onDown);
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("mousemove", onMove);
 
     lastFrameTimeRef.current = 0;
     const animate = (timeMs = 0) => {
@@ -446,9 +481,9 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
     return () => {
       isMounted = false;
 
-      canvas.removeEventListener('mousedown', onDown);
-      window.removeEventListener('mouseup', onUp);
-      window.removeEventListener('mousemove', onMove);
+      canvas.removeEventListener("mousedown", onDown);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("mousemove", onMove);
 
       cancelAnimationFrame(animationFrameRef.current);
 
@@ -479,36 +514,37 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
   ]);
 
   useEffect(() => {
-    const { hemisphere, ambient, key, fill } = lightRefs.current;
-    if (!hemisphere || !ambient || !key || !fill) return;
-
-    hemisphere.intensity = BASE_LIGHTS.hemisphere * lightStrength;
-    ambient.intensity = BASE_LIGHTS.ambient * lightStrength;
-    key.intensity = BASE_LIGHTS.key * lightStrength;
-    fill.intensity = BASE_LIGHTS.fill * lightStrength;
+    applyLightStrength(lightRefs.current, lightStrength);
   }, [lightStrength]);
 
   useEffect(() => {
     const handleResize = () => {
-      if (!canvasRef.current || !rendererRef.current || !cameraRef.current) return;
+      if (!canvasRef.current || !rendererRef.current || !cameraRef.current)
+        return;
 
-      const width = Math.max(128, canvasRef.current.parentElement?.clientWidth || 800);
-      const height = Math.max(96, canvasRef.current.parentElement?.clientHeight || 600);
+      const width = Math.max(
+        128,
+        canvasRef.current.parentElement?.clientWidth || 800,
+      );
+      const height = Math.max(
+        96,
+        canvasRef.current.parentElement?.clientHeight || 600,
+      );
 
       rendererRef.current.setSize(width, height, false);
       cameraRef.current.aspect = width / height;
       cameraRef.current.updateProjectionMatrix();
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return (
     <div className="carousel-canvas-container">
       <canvas
         ref={canvasRef}
-        className={isGrabbing ? 'carousel-canvas grabbing' : 'carousel-canvas'}
+        className={isGrabbing ? "carousel-canvas grabbing" : "carousel-canvas"}
       />
 
       <button
@@ -516,16 +552,19 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
         onClick={handleSeeMore}
         title="See more details"
       >
-        <FaEye size={16} /> <span className='see-more-text'>SEE MORE</span>
+        <FaEye size={16} /> <span className="see-more-text">SEE MORE</span>
       </button>
       <div className="canvas-button-stack">
-
         {textureOptions.length > 0 && (
-          <div className="canvas-texture-row" role="group" aria-label="Texture options">
+          <div
+            className="canvas-texture-row"
+            role="group"
+            aria-label="Texture options"
+          >
             {textureOptions.map((texture) => (
               <button
                 key={texture.key || texture.label}
-                className={`texture-option-chip ${selectedTextureKey === texture.key ? 'active' : ''}`}
+                className={`texture-option-chip ${selectedTextureKey === texture.key ? "active" : ""}`}
                 onClick={() => handleTexture(texture)}
                 title={texture.label || texture.key}
               >
@@ -536,7 +575,9 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
                     className="texture-preview-image"
                   />
                 ) : (
-                  <span className="texture-preview-placeholder">{texture.label || texture.key}</span>
+                  <span className="texture-preview-placeholder">
+                    {texture.label || texture.key}
+                  </span>
                 )}
               </button>
             ))}
@@ -544,19 +585,31 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
         )}
 
         {stateOptions.length > 0 && (
-          <div className="canvas-state-row" role="group" aria-label="Model states">
+          <div
+            className="canvas-state-row"
+            role="group"
+            aria-label="Model states"
+          >
             <button
               className={`canvas-stack-button state-btn cycle-btn`}
               onClick={cycleState}
-              title={stateOptions.find((s) => s.key === selectedStateKey)?.description || 'Cycle state'}
+              title={
+                stateOptions.find((s) => s.key === selectedStateKey)
+                  ?.description || "Cycle state"
+              }
             >
-              {stateOptions.find((s) => s.key === selectedStateKey)?.label || 'Toggle State'}
+              {stateOptions.find((s) => s.key === selectedStateKey)?.label ||
+                "Toggle State"}
             </button>
           </div>
         )}
 
         {animationActions.length > 0 && (
-          <div className="canvas-animation-row" role="group" aria-label="Model animations">
+          <div
+            className="canvas-animation-row"
+            role="group"
+            aria-label="Model animations"
+          >
             {animationActions.map((animationDef) => (
               <button
                 key={animationDef.key || animationDef.label}
@@ -571,11 +624,11 @@ function CarouselCanvas({ productKey, lightStrength = 1, onModelScreenPointChang
         )}
 
         <button
-          className={`canvas-stack-button wireframe-btn ${wireframeMode ? 'active' : ''}`}
+          className={`canvas-stack-button wireframe-btn ${wireframeMode ? "active" : ""}`}
           onClick={toggleWireframe}
           title="Toggle wireframe"
         >
-          {wireframeMode ? 'Hide' : 'Show'} Wireframe
+          {wireframeMode ? "Hide" : "Show"} Wireframe
         </button>
       </div>
     </div>

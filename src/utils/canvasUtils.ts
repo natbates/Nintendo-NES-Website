@@ -44,6 +44,7 @@ export const cacheMaterialDefaults = (model) => {
 export const loadTexture = (path, textureCache) => {
   if (!path) return Promise.resolve(null);
 
+  // Cache the in-flight promise so concurrent requests for the same texture dedupe naturally.
   const existing = textureCache.get(path);
   if (existing) return existing;
 

@@ -1,16 +1,23 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useResources } from '../../context/ResourceContext';
-import { useCarousel } from '../../context/CarouselContext';
-import CarouselCanvas from './CarouselCanvas';
-import CarouselInfoBox from './CarouselInfoBox';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useResources } from "../../context/ResourceContext";
+import { useCarousel } from "../../context/CarouselContext";
+import CarouselCanvas from "./CarouselCanvas";
+import CarouselInfoBox from "./CarouselInfoBox";
 
-import '../../styles/CarouselSlide.css';
+import "../../styles/CarouselSlide.css";
 
-function CarouselSlide({ productKey, index, lightStrength, onClick, onModelReady, shouldReportReady = true }) {
+function CarouselSlide({
+  productKey,
+  index,
+  lightStrength,
+  onClick,
+  onModelReady,
+  shouldReportReady = true,
+}) {
   const { modelConfigs, productKeys } = useResources();
   const { isGrabbing, currentIndex } = useCarousel();
   const config = modelConfigs[productKey];
-  const [infoBoxes, setInfoBoxes] = useState([]);
+  const [infoBoxes] = useState([]);
   const svgRef = useRef(null);
   const slideRef = useRef(null);
   const overlayRef = useRef(null);
@@ -31,28 +38,32 @@ function CarouselSlide({ productKey, index, lightStrength, onClick, onModelReady
       x: slideRect.width / 2,
       y: slideRect.height / 2,
     };
+    // Use model anchor from the 3D canvas, but keep a center fallback before first projection arrives.
     const modelCenter = modelAnchorRef.current || fallbackCenter;
 
-    svg.innerHTML = '';
-    svg.setAttribute('viewBox', `0 0 ${slideRect.width} ${slideRect.height}`);
-    svg.setAttribute('width', slideRect.width);
-    svg.setAttribute('height', slideRect.height);
+    svg.innerHTML = "";
+    svg.setAttribute("viewBox", `0 0 ${slideRect.width} ${slideRect.height}`);
+    svg.setAttribute("width", slideRect.width);
+    svg.setAttribute("height", slideRect.height);
+
+    const svgNamespace = svg.namespaceURI;
 
     const drawLine = (from, to) => {
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', from.x);
-      line.setAttribute('y1', from.y);
-      line.setAttribute('x2', to.x);
-      line.setAttribute('y2', to.y);
-      line.setAttribute('stroke', 'rgba(255, 255, 255, 0.3)');
-      line.setAttribute('stroke-width', '1');
-      line.setAttribute('stroke-dasharray', '4,4');
+      const line = document.createElementNS(svgNamespace, "line");
+      line.setAttribute("x1", from.x);
+      line.setAttribute("y1", from.y);
+      line.setAttribute("x2", to.x);
+      line.setAttribute("y2", to.y);
+      line.setAttribute("stroke", "rgba(255, 255, 255, 0.3)");
+      line.setAttribute("stroke-width", "1");
+      line.setAttribute("stroke-dasharray", "4,4");
       svg.appendChild(line);
     };
 
     const overlayElement = overlayRef.current;
     if (overlayElement) {
       const overlayRect = overlayElement.getBoundingClientRect();
+      // Convert overlay position from viewport coordinates to the slide-local SVG coordinate space.
       const overlayPoint = {
         x: overlayRect.left - slideRect.left + overlayRect.width / 2,
         y: overlayRect.bottom - slideRect.top,
@@ -65,6 +76,7 @@ function CarouselSlide({ productKey, index, lightStrength, onClick, onModelReady
       if (!boxElement) return;
 
       const boxRect = boxElement.getBoundingClientRect();
+      // Translate viewport coords into slide-local coords so connector lines align with the SVG viewBox.
       const boxCenter = {
         x: boxRect.left - slideRect.left + boxRect.width / 2,
         y: boxRect.top - slideRect.top + boxRect.height / 2,
@@ -77,6 +89,7 @@ function CarouselSlide({ productKey, index, lightStrength, onClick, onModelReady
   const queueConnectorDraw = useCallback(() => {
     if (drawFrameRef.current) return;
 
+    // Coalesce rapid updates (resize, drag, index changes) into one paint-frame draw.
     drawFrameRef.current = requestAnimationFrame(() => {
       drawFrameRef.current = null;
       drawConnectors();
@@ -87,10 +100,10 @@ function CarouselSlide({ productKey, index, lightStrength, onClick, onModelReady
     queueConnectorDraw();
 
     const onResize = () => queueConnectorDraw();
-    window.addEventListener('resize', onResize);
+    window.addEventListener("resize", onResize);
 
     return () => {
-      window.removeEventListener('resize', onResize);
+      window.removeEventListener("resize", onResize);
       if (drawFrameRef.current) {
         cancelAnimationFrame(drawFrameRef.current);
         drawFrameRef.current = null;
@@ -98,18 +111,24 @@ function CarouselSlide({ productKey, index, lightStrength, onClick, onModelReady
     };
   }, [queueConnectorDraw, currentIndex]);
 
-  const handleModelAnchorChange = useCallback((point) => {
-    modelAnchorRef.current = point;
-    queueConnectorDraw();
-  }, [queueConnectorDraw]);
+  const handleModelAnchorChange = useCallback(
+    (point) => {
+      modelAnchorRef.current = point;
+      queueConnectorDraw();
+    },
+    [queueConnectorDraw],
+  );
 
   const slideCount = productKeys.length;
   const diff = Math.abs(index - currentIndex);
+  // Carousel wraps around, so use the shortest circular distance for near/far styling.
   const distance = Math.min(diff, slideCount - diff);
   const slideClass =
-    distance === 0 ? 'carousel-slide active'
-      : distance === 1 ? 'carousel-slide near'
-      : 'carousel-slide far';
+    distance === 0
+      ? "carousel-slide active"
+      : distance === 1
+        ? "carousel-slide near"
+        : "carousel-slide far";
 
   return (
     <div
@@ -128,10 +147,7 @@ function CarouselSlide({ productKey, index, lightStrength, onClick, onModelReady
           shouldReportReady={shouldReportReady}
         />
         {/* Connector lines SVG */}
-        <svg
-          ref={svgRef}
-          className="carousel-slide-connector"
-        />
+        <svg ref={svgRef} className="carousel-slide-connector" />
       </div>
 
       <div className="carousel-slide-overlay" ref={overlayRef}>

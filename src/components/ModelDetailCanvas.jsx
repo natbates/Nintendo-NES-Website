@@ -12,16 +12,14 @@ import {
   applyTextureDefinition,
   restoreMaterialDefaults,
 } from '../utils/canvasUtils.ts';
+import {
+  createSceneLights,
+  applyLightStrength,
+  frameCameraToModel,
+} from '../utils/sceneSetupUtils.ts';
 import CanvasControlBar from './CanvasControlBar';
 import LoadingSpinner from './LoadingSpinner';
 import { FaPlus, FaMinus } from 'react-icons/fa6';
-
-const BASE_LIGHTS = {
-  hemisphere: 1.15,
-  ambient: 1.2,
-  key: 2.25,
-  fill: 1.2,
-};
 
 function ModelDetailCanvas({ productKey }) {
   const canvasRef = useRef(null);
@@ -49,10 +47,9 @@ function ModelDetailCanvas({ productKey }) {
   const { modelConfigs, makeModelPath, resolveResourceValue } = useResources();
   const config = modelConfigs?.[productKey];
 
-  // Hide spinner immediately if there is no config for this productKey
   useEffect(() => {
     if (!config) {
-      setModelLoading(false);
+      setModelLoading(false); // No config means nothing to load for this route.
     }
   }, [config]);
 
@@ -102,7 +99,6 @@ function ModelDetailCanvas({ productKey }) {
     controls.update();
   }, []);
 
-  // Preload known sounds and provide cached playback to reduce latency
   useEffect(() => {
     if (!config) return;
 
@@ -138,7 +134,6 @@ function ModelDetailCanvas({ productKey }) {
       audioCacheRef.current.set(src, audio);
     }
 
-    // stop any currently playing audio (single playback policy)
     if (currentAudioRef.current && currentAudioRef.current !== audio) {
       try {
         currentAudioRef.current.pause();
@@ -154,7 +149,6 @@ function ModelDetailCanvas({ productKey }) {
     });
   }, [resolveResourceValue, soundEnabled]);
 
-  // cleanup audio on unmount
   useEffect(() => {
     return () => {
       if (currentAudioRef.current) {
@@ -256,13 +250,7 @@ function ModelDetailCanvas({ productKey }) {
   }, [applyState, selectedStateKey, stateOptions]);
 
   useEffect(() => {
-    const { hemisphere, ambient, key, fill } = lightRefs.current;
-    if (!hemisphere || !ambient || !key || !fill) return;
-
-    hemisphere.intensity = BASE_LIGHTS.hemisphere * lightStrength;
-    ambient.intensity = BASE_LIGHTS.ambient * lightStrength;
-    key.intensity = BASE_LIGHTS.key * lightStrength;
-    fill.intensity = BASE_LIGHTS.fill * lightStrength;
+    applyLightStrength(lightRefs.current, lightStrength); // Keep lighting ratios identical while scaling brightness.
   }, [lightStrength]);
 
   useEffect(() => {
@@ -293,27 +281,7 @@ function ModelDetailCanvas({ productKey }) {
     camera.position.set(0, 3, 9);
     cameraRef.current = camera;
 
-    // Lighting (same as carousel)
-    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0xffffff, BASE_LIGHTS.hemisphere * lightStrength);
-    scene.add(hemisphereLight);
-
-    const ambientLight = new THREE.AmbientLight(0xffffff, BASE_LIGHTS.ambient * lightStrength);
-    scene.add(ambientLight);
-
-    const keyLight = new THREE.DirectionalLight(0xffffff, BASE_LIGHTS.key * lightStrength);
-    keyLight.position.set(6, 8, 5);
-    scene.add(keyLight);
-
-    const fillLight = new THREE.DirectionalLight(0xffffff, BASE_LIGHTS.fill * lightStrength);
-    fillLight.position.set(-5, 3, -4);
-    scene.add(fillLight);
-
-    lightRefs.current = {
-      hemisphere: hemisphereLight,
-      ambient: ambientLight,
-      key: keyLight,
-      fill: fillLight,
-    };
+    lightRefs.current = createSceneLights(scene, lightStrength);
 
     const loader = new GLTFLoader();
     let isMounted = true;
@@ -333,19 +301,7 @@ function ModelDetailCanvas({ productKey }) {
         model.rotation.z = Math.PI / 4;
         model.scale.setScalar(1);
 
-        const box = new THREE.Box3().setFromObject(model);
-        const size = box.getSize(new THREE.Vector3());
-        const center = box.getCenter(new THREE.Vector3());
-
-        model.position.sub(center);
-
-        const maxSize = Math.max(size.x, size.y, size.z);
-        const fov = (camera.fov * Math.PI) / 180;
-        const distance = maxSize / (2 * Math.tan(fov / 2));
-
-        camera.position.set(0, maxSize * 0.35, distance * 1.4);
-        camera.lookAt(0, 0, 0);
-        camera.updateProjectionMatrix();
+        frameCameraToModel(camera, model);
 
         model.scale.setScalar(config.scale ?? 1);
 
@@ -365,17 +321,15 @@ function ModelDetailCanvas({ productKey }) {
           applyState(defaultState, { playEffects: false });
         }
 
-        // delay to allow renderer to display model before hiding spinner
         setTimeout(() => {
-          if (isMounted) setModelLoading(false);
+          if (isMounted) setModelLoading(false); // Prevent a flash of empty canvas before first paint.
         }, 400);
       },
       undefined,
       (err) => {
         console.error('GLB load error:', err);
-        // clear loading state on error too, with delay
         setTimeout(() => {
-          if (isMounted) setModelLoading(false);
+          if (isMounted) setModelLoading(false); // Release loading UI even when model fetch fails.
         }, 400);
       }
     );

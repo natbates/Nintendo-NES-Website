@@ -1,4 +1,3 @@
-
 import "../styles/References.css";
 
 const references = [
@@ -15,7 +14,8 @@ const references = [
   {
     label: "Original Creator of the 3D models",
     url: "https://www.nintendo.com/en-gb/",
-    description: "The original creator of the 3D models used in this project (I didnt invent the NES)."
+    description:
+      "The original creator of the 3D models used in this project (I didnt invent the NES).",
   },
   {
     label: "Font used",
@@ -40,8 +40,9 @@ const references = [
   {
     label: "Building a React Carousel Component",
     url: "https://www.freecodecamp.org/news/how-to-build-an-image-carousel-component/",
-    description: "Guide on implementing carousel patterns in React including auto-scroll and horizontal centering logic.",
-  }
+    description:
+      "Guide on implementing carousel patterns in React including auto-scroll and horizontal centering logic.",
+  },
 ];
 
 const References = () => {

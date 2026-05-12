@@ -11,9 +11,9 @@
   margin-bottom: 24px;
 }
 
-.model-title span{
-    font-size: clamp(2rem, 3vw, 4rem);
-    opacity: 0.6;
+.model-title span {
+  font-size: clamp(2rem, 3vw, 4rem);
+  opacity: 0.6;
 }
 
 .model-title {
@@ -24,7 +24,6 @@
   margin-bottom: 0;
   margin-top: 15px;
   color: var(--accent);
-
 }
 
 .model-section {
@@ -33,12 +32,12 @@
   background: rgba(0, 0, 0, 0.32);
   border: 1px solid rgba(255, 255, 255, 0.16);
 
-.model-canvas-section {
-  margin-top: 28px;
-  padding: 18px;
-  background: rgba(0, 0, 0, 0.32);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-}
+  .model-canvas-section {
+    margin-top: 28px;
+    padding: 18px;
+    background: rgba(0, 0, 0, 0.32);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+  }
 }
 
 .model-section h2 {

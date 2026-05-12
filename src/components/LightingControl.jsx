@@ -1,10 +1,15 @@
-import React from 'react';
-import { FaMoon, FaSun } from 'react-icons/fa6';
-import { useCarousel } from '../context/CarouselContext';
+import React from "react";
+import { FaMoon, FaSun } from "react-icons/fa6";
+import { useCarousel } from "../context/CarouselContext";
 
-function LightingControl({ className = '', value, onChange }) {
-  const { lightStrength: carouselLightStrength, setLightStrength: setCarouselLightStrength } = useCarousel();
-  const resolvedValue = typeof value === 'number' ? value : carouselLightStrength;
+function LightingControl({ className = "", value, onChange }) {
+  const {
+    lightStrength: carouselLightStrength,
+    setLightStrength: setCarouselLightStrength,
+  } = useCarousel();
+  // Support both controlled usage (value/onChange props) and context-driven fallback.
+  const resolvedValue =
+    typeof value === "number" ? value : carouselLightStrength;
   const handleChange = onChange || setCarouselLightStrength;
 
   return (

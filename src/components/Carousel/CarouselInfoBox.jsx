@@ -1,21 +1,19 @@
-import React from 'react';
+import React from "react";
 
-import '../../styles/CarouselInfoBox.css';
+import "../../styles/CarouselInfoBox.css";
 
 function CarouselInfoBox({ box }) {
   return (
     <div className="carousel-info-box">
-      <div className="carousel-info-box-title">
-        {box.title.toUpperCase()}
-      </div>
-      {box.type === 'image' && box.src && (
+      <div className="carousel-info-box-title">{box.title.toUpperCase()}</div>
+      {box.type === "image" && box.src && (
         <img
           src={box.src}
           alt={box.title}
           className="carousel-info-box-media"
         />
       )}
-      {box.type === 'video' && box.src && (
+      {box.type === "video" && box.src && (
         <video
           src={box.src}
           poster={box.poster}

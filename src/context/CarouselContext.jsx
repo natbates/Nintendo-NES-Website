@@ -1,4 +1,10 @@
-import React, { createContext, useState, useCallback, useRef, useEffect } from 'react';
+import React, {
+  createContext,
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+} from "react";
 
 export const CarouselContext = createContext();
 
@@ -13,14 +19,16 @@ export function CarouselProvider({ children }) {
   const manualPauseRef = useRef(false);
   const [slideCount, setSlideCount] = useState(0);
 
-  const pauseCarousel = useCallback((reason = 'interaction') => {
-    if (reason === 'manual') {
+  const pauseCarousel = useCallback((reason = "interaction") => {
+    // Manual pauses should persist until the user explicitly resumes.
+    if (reason === "manual") {
       manualPauseRef.current = true;
     }
     setIsPaused(true);
   }, []);
 
   const resumeCarousel = useCallback(() => {
+    // Ignore auto-resume requests while the user has manually paused autoplay.
     if (manualPauseRef.current) return;
     setIsPaused(false);
   }, []);
@@ -38,6 +46,7 @@ export function CarouselProvider({ children }) {
       autoplayTimerRef.current = null;
     }
 
+    // Restart from a full interval after user interaction so advancing feels predictable.
     autoplayTimerRef.current = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % slideCount);
     }, 4000);
@@ -48,11 +57,11 @@ export function CarouselProvider({ children }) {
   }, []);
 
   const nextSlide = useCallback(() => {
-    setCurrentIndex(prev => (prev + 1) % slideCount);
+    setCurrentIndex((prev) => (prev + 1) % slideCount);
   }, [slideCount]);
 
   const prevSlide = useCallback(() => {
-    setCurrentIndex(prev => (prev - 1 + slideCount) % slideCount);
+    setCurrentIndex((prev) => (prev - 1 + slideCount) % slideCount);
   }, [slideCount]);
 
   // Keep a single autoplay interval synchronized to pause state.
@@ -110,7 +119,7 @@ export function CarouselProvider({ children }) {
 export function useCarousel() {
   const context = React.useContext(CarouselContext);
   if (!context) {
-    throw new Error('useCarousel must be used within a CarouselProvider');
+    throw new Error("useCarousel must be used within a CarouselProvider");
   }
   return context;
 }

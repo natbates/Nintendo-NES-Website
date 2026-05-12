@@ -1,9 +1,9 @@
-import React from 'react';
-import { FaPause, FaPlay, FaVolumeHigh, FaVolumeXmark } from 'react-icons/fa6';
-import '../styles/Carousel.css';
+import React from "react";
+import { FaPause, FaPlay, FaVolumeHigh, FaVolumeXmark } from "react-icons/fa6";
+import "../styles/Carousel.css";
 
 function CanvasControlBar({
-  className = '',
+  className = "",
   showSpinToggle = true,
   showSoundToggle = true,
   spinEnabled = false,
@@ -12,12 +12,14 @@ function CanvasControlBar({
   onSoundToggle,
 }) {
   const handleSpinToggle = (event) => {
+    // Bubble checkbox state upward so parent components own the spin behavior.
     if (onSpinToggle) {
       onSpinToggle(event.target.checked);
     }
   };
 
   const handleSoundToggle = (event) => {
+    // Keep this component stateless: only report the next value.
     if (onSoundToggle) {
       onSoundToggle(event.target.checked);
     }
@@ -27,40 +29,49 @@ function CanvasControlBar({
     <div className={`carousel-toggle-row ${className}`.trim()}>
       {showSpinToggle && (
         <label
-        className="carousel-toggle"
-        title={spinEnabled ? 'Stop spinning this model' : 'Spin this model'}
+          className="carousel-toggle"
+          title={spinEnabled ? "Stop spinning this model" : "Spin this model"}
         >
-        <input
+          <input
             type="checkbox"
             checked={spinEnabled}
             onChange={handleSpinToggle}
             aria-label="Toggle model spin"
-        />
-        <span className={`spin-checkbox ${spinEnabled ? 'checked' : ''}`} aria-hidden="true">
+          />
+          <span
+            className={`spin-checkbox ${spinEnabled ? "checked" : ""}`}
+            aria-hidden="true"
+          >
             {spinEnabled && <span className="pixel-tick" />}
-        </span>
-        <span className="spin-toggle-label">Spin the model</span>
+          </span>
+          <span className="spin-toggle-label">Spin the model</span>
         </label>
       )}
 
       {showSoundToggle && (
         <label
-        className="carousel-toggle"
-        title={soundEnabled ? 'Mute audio for this model' : 'Unmute audio for this model'}
+          className="carousel-toggle"
+          title={
+            soundEnabled
+              ? "Mute audio for this model"
+              : "Unmute audio for this model"
+          }
         >
-        <input
+          <input
             type="checkbox"
             checked={soundEnabled}
             onChange={handleSoundToggle}
             aria-label="Toggle model sounds"
-        />
-        <span className={`spin-checkbox ${soundEnabled ? 'checked' : ''}`} aria-hidden="true">
+          />
+          <span
+            className={`spin-checkbox ${soundEnabled ? "checked" : ""}`}
+            aria-hidden="true"
+          >
             {soundEnabled && <span className="pixel-tick" />}
-        </span>
-        <span className="spin-toggle-label">Play sound</span>
+          </span>
+          <span className="spin-toggle-label">Play sound</span>
         </label>
       )}
-
     </div>
   );
 }

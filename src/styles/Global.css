@@ -24,8 +24,7 @@ body {
   overflow-x: hidden;
 }
 
-.page
-{
+.page {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -50,26 +49,22 @@ a {
   text-decoration: none;
 }
 
-.link
-{
+.link {
   color: var(--accent);
   text-decoration: underline;
   transition: color 0.3s ease;
 }
 
-.link:hover
-{
+.link:hover {
   color: var(--link-hover);
 }
 
-.text-block
-{
+.text-block {
   border-left: 2px solid rgba(255, 255, 255, 0.351);
   padding-left: 16px;
 }
 
-button
-{
+button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -82,11 +77,13 @@ button
   color: #ffffff;
   font-weight: 700;
   font-size: 0.85rem;
-  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
 }
 
-#page-container
-{
+#page-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -94,8 +91,7 @@ button
   overflow: hidden;
 }
 
-#page-content
-{
+#page-content {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -111,8 +107,8 @@ button
   width: 100%;
   background-image: repeating-linear-gradient(
     90deg,
-    rgba(255,255,255,0.09) 0,
-    rgba(255,255,255,0.09) 1px,
+    rgba(255, 255, 255, 0.09) 0,
+    rgba(255, 255, 255, 0.09) 1px,
     transparent 1px,
     transparent 40px
   );
@@ -121,8 +117,7 @@ button
   z-index: -1;
 }
 
-.background-words
-{
+.background-words {
   position: absolute;
   left: 0;
   top: 0;
@@ -131,7 +126,7 @@ button
   height: 100%;
 }
 
-.background-words h1{
+.background-words h1 {
   display: flex;
   align-items: center;
   font-size: 19.5vh;

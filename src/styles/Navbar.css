@@ -1,72 +1,74 @@
 #nav-bar {
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem 1.25rem;
-    background: rgba(18, 18, 18, 0.92);
-    backdrop-filter: blur(18px);
-    border-bottom: 2px solid rgba(255, 255, 255, 0.503);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: rgba(18, 18, 18, 0.92);
+  backdrop-filter: blur(18px);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.503);
 }
 
 .nav-left {
-    display: flex;
-    align-items: flex-end;
-    gap: 0.75rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
 }
 
 .nav-logo {
-    width: auto;
-    height: 55px;
-    flex: 1;
-    object-fit: contain;
-    cursor: pointer;
+  width: auto;
+  height: 55px;
+  flex: 1;
+  object-fit: contain;
+  cursor: pointer;
 }
 
 .nav-title {
-    font-size: clamp(1.15rem, 2.4vw, 2rem);
-    font-weight: 500;
-    letter-spacing: 0.5px;
+  font-size: clamp(1.15rem, 2.4vw, 2rem);
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
-.nav-title span
-{
-    opacity: 0.7;
+.nav-title span {
+  opacity: 0.7;
 }
 
 .nav-title em {
-    font-style: italic;
-    opacity: 0.7;
+  font-style: italic;
+  opacity: 0.7;
 }
 
 .nav-menu {
-    display: flex;
-    gap: 1rem;
+  display: flex;
+  gap: 1rem;
 }
 
 #nav-bar a {
-    font-size: 0.7rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-family: inherit;
-    padding: 0.65rem 0.95rem;
-    border-radius: 0;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid transparent;
-    cursor: pointer;
-    color: #ffffff;
-    font-weight: 700;
-    transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+  font-size: 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  padding: 0.65rem 0.95rem;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid transparent;
+  cursor: pointer;
+  color: #ffffff;
+  font-weight: 700;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
 }
 
 #nav-bar a:hover {
-    background: rgba(255, 255, 255, 0.18);
-    border-color: var(--accent);
-    color: var(--accent);
+  background: rgba(255, 255, 255, 0.18);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* Active / current page link styling (subtle) */
@@ -75,8 +77,8 @@
 #nav-bar a[aria-current="page"],
 #nav-bar .nav-link.active,
 #nav-bar .nav-link[aria-current="page"] {
-    background: var(--accent);
-    color: #0b0b0b;
-    border-color: var(--accent);
-    box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+  background: var(--accent);
+  color: #0b0b0b;
+  border-color: var(--accent);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
 }

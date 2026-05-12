@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect } from "react";
 
 export const ResourceContext = createContext();
 
@@ -8,37 +8,39 @@ export function ResourceProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const assetRoot = '/assets';
-  const productKeys = ['nes-system', 'controller', 'cartridge', 'zapper'];
+  const assetRoot = "/assets";
+  const productKeys = ["nes-system", "controller", "cartridge", "zapper"];
 
+  // Encode each path segment so spaces and special characters still resolve as static assets.
   const encodeAssetPath = (path) => {
     return path
-      .replace(/^\/+/, '')
-      .split('/')
+      .replace(/^\/+/, "")
+      .split("/")
       .map((segment) => encodeURIComponent(segment))
-      .join('/');
+      .join("/");
   };
 
   const makeModelPath = (filename) => {
-    if (!filename || typeof filename !== 'string') return null;
+    if (!filename || typeof filename !== "string") return null;
 
-    const normalized = filename.replace(/^\/+/, '').replace(/^models\//i, '');
+    const normalized = filename.replace(/^\/+/, "").replace(/^models\//i, "");
     return `${assetRoot}/models/${encodeAssetPath(normalized)}`;
   };
 
   const makeResourcePath = (relativePath) => {
-    if (!relativePath || typeof relativePath !== 'string') return null;
-    return `${assetRoot}/${encodeAssetPath(relativePath.replace(/^\/+/, ''))}`;
+    if (!relativePath || typeof relativePath !== "string") return null;
+    return `${assetRoot}/${encodeAssetPath(relativePath.replace(/^\/+/, ""))}`;
   };
 
   const resolveResourceValue = (value) => {
-    if (!value || typeof value !== 'string') return value ?? null;
+    if (!value || typeof value !== "string") return value ?? null;
 
+    // Leave absolute URLs and data/blob sources untouched; only normalize local asset paths.
     if (
-      value.startsWith('http://') ||
-      value.startsWith('https://') ||
-      value.startsWith('data:') ||
-      value.startsWith('blob:')
+      value.startsWith("http://") ||
+      value.startsWith("https://") ||
+      value.startsWith("data:") ||
+      value.startsWith("blob:")
     ) {
       return value;
     }
@@ -56,9 +58,12 @@ export function ResourceProvider({ children }) {
         throw new Error(`${path} failed: ${response.status}`);
       }
 
-      const contentType = response.headers.get('content-type') || '';
-      if (!contentType.includes('application/json')) {
-        console.warn(`[ResourceContext] ${path} returned non-JSON content-type: ${contentType}`);
+      const contentType = response.headers.get("content-type") || "";
+      // Some static hosts return HTML fallback pages; treat non-JSON as missing config data.
+      if (!contentType.includes("application/json")) {
+        console.warn(
+          `[ResourceContext] ${path} returned non-JSON content-type: ${contentType}`,
+        );
         return null;
       }
 
@@ -73,13 +78,19 @@ export function ResourceProvider({ children }) {
         if (textureData) {
           setTextureDefinitions(textureData);
         } else {
-          console.warn('[ResourceContext] textures.json not found or invalid; continuing without textures');
+          // Textures are optional, so continue with an empty texture map.
+          console.warn(
+            "[ResourceContext] textures.json not found or invalid; continuing without textures",
+          );
           setTextureDefinitions({});
         }
 
-        const configData = await fetchJsonAsset(`${assetRoot}/model-config.json`);
+        const configData = await fetchJsonAsset(
+          `${assetRoot}/model-config.json`,
+        );
+        // Model config is required because it drives all model routes and UI metadata.
         if (!configData) {
-          throw new Error('model-config.json not found or invalid');
+          throw new Error("model-config.json not found or invalid");
         }
 
         if (!configData.models || !Array.isArray(configData.models)) {
@@ -89,14 +100,13 @@ export function ResourceProvider({ children }) {
         const mapped = Object.fromEntries(
           configData.models.map((model) => {
             return [model.key, model];
-          })
+          }),
         );
 
         setModelConfigs(mapped);
         setError(null);
-        
       } catch (err) {
-        console.error('[ResourceContext] FAILED:', err);
+        console.error("[ResourceContext] FAILED:", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -128,7 +138,7 @@ export function ResourceProvider({ children }) {
 export function useResources() {
   const context = React.useContext(ResourceContext);
   if (!context) {
-    throw new Error('useResources must be used within a ResourceProvider');
+    throw new Error("useResources must be used within a ResourceProvider");
   }
   return context;
 }
