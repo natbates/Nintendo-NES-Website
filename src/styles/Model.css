@@ -90,14 +90,6 @@
   display: block;
   background: rgba(255, 255, 255, 0.08);
   border: none;
-}
-
-.model-media-card img,
-.model-media-card video {
-  object-fit: cover;
-}
-
-.model-media-image {
   aspect-ratio: 16 / 9;
   object-fit: cover;
 }
